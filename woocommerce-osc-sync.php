@@ -502,8 +502,10 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                     otw_log_delete("importImage");
                     otw_log("importImage", "Start Import");
                     // Import the IMAGES
-                    if ($products = $oscdb->get_results("SELECT * FROM products", ARRAY_A)) {
+                    //if ($products = $oscdb->get_results("SELECT * FROM products", ARRAY_A)) {
+					if ($products = $oscdb->get_results("SELECT * FROM `products` where `products_id` > 18427", ARRAY_A)) {
                         foreach ($products as $product) {
+							otw_log("importImage", "Migrating OSC ID:" . $product['products_id'] . "Image Name:" . $product['products_image']);
                             $existing_product = get_posts(array('post_type' => 'product', 'posts_per_page' => 1, 'post_status' => 'any',
                                 'meta_query' => array(
                                     array(
@@ -516,9 +518,10 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                               update products set products_image = replace(products_image, '(', '-');
                               update products set products_image = replace(products_image, ')', '-');
                               update products set products_image = replace(products_image, '+', '-'); */
-                            if (!empty($existing_product)) {
+                            if (!empty($existing_product)) {								
                                 $product_id = $existing_product[0]->ID;
                                 $attach_id = 0;
+								//otw_log("importImage", "Existing Product for image found OSC:" . $product_id . " WP Product ID: " . );
                                 if ($product['products_image'] != '') {
                                     if (esc_url($_POST['store_url'])) {
 
@@ -551,6 +554,9 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                                     set_post_thumbnail($product_id, $attach_id);
                                 }
                             }
+							else {
+								otw_log("importImage", "OSC ID:" . $product['products_id'] . " does not exist, no upload");
+							}
                         }
                     }
                     otw_log("importImage", "End Import");
